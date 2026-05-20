@@ -27,6 +27,9 @@ sed -i '' "s/\"version\": \"$CURRENT\"/\"version\": \"$NEW\"/" plugin.json
 # Update README badge
 sed -i '' "s/version-$CURRENT-/version-$NEW-/g" README.md 2>/dev/null || true
 
+# Update marketplace.json (must stay in sync or /plugin reports "already at latest")
+sed -i '' "s/\"version\": \"$CURRENT\"/\"version\": \"$NEW\"/" .claude-plugin/marketplace.json
+
 echo "Bumped: $CURRENT → $NEW"
-git add plugin.json README.md
+git add plugin.json README.md .claude-plugin/marketplace.json
 git commit -m "chore: bump version to $NEW"
