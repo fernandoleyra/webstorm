@@ -1,0 +1,58 @@
+# Muster Projekt — Root Governance
+
+This file applies to every prototype. Each prototype's own `CLAUDE.md` may add
+additional rules but may not override the brand floor or the prohibition list below.
+
+## Brand floor (non-negotiable)
+
+`brand/tokens.css` — CSS custom properties that are the brand's visual floor.
+Every prototype must consume these via `var(--brand-*)`. Do not redefine or
+override brand token names.
+
+`brand/voice.md` — tone and copy direction. Apply to all prototypes.
+
+`assets/` — root-level brand files (logo, brand book, etc.). Use but do not modify.
+
+## Shared pages
+
+Home, About, Projects, Contact
+
+## Shared features
+
+Contact form, Image gallery
+
+## Anti-AI-slop prohibition list (all prototypes — no exceptions without documentation)
+
+### Typography
+- No `Inter`, `system-ui`, or `-apple-system` as the primary typeface.
+- Required: each prototype declares a named typeface in `style-N/tokens.css`.
+
+### Color
+- No Tailwind default color scales (`slate-*`, `zinc-*`, `gray-*`, `indigo-*`,
+  `purple-*`, `violet-*`) as the brand color.
+- No purple-to-blue, pink-to-orange, or teal-to-pink gradients.
+- All hex values must trace to `brand/tokens.css` OR a documented reference choice.
+
+### Composition
+- No centered-hero-plus-two-CTAs as the default layout unless a named reference uses it.
+- No `rounded-2xl shadow-lg` card pattern as the default component.
+- No three-column feature grid as the default below-hero section.
+
+### Iconography
+- No Lucide, Heroicons, or Font Awesome by default.
+- Declare your icon strategy (custom SVG, dingbats, or none) in your `CLAUDE.md`.
+
+### Copy
+- No "Transform your...", "Built for...", "The future of...", "Empower your..."
+- Copy must derive from `brand/voice.md` or be lifted in tone from your declared references.
+
+### Deviation protocol
+Any deviation from the above must be documented inline:
+```html
+<!-- deviation: centered hero — matches reference https://example.com -->
+```
+
+## Worktree model
+
+Each parallel agent writes only inside its own `style-N/` folder.
+The other two style folders are read-only context.

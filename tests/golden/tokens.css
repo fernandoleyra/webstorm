@@ -1,0 +1,39 @@
+/* Muster Projekt — Brand Design Tokens
+ *
+ * Source: Brand URL scrape (https://example-studio.ch)
+ *
+ * These are the brand floor. Prototypes extend via their own style-N/tokens.css
+ * using these as the base. Do not override these property names.
+ *
+ * Greenfield note: if marked DRAFT, replace these with the real brand before production.
+ */
+
+:root {
+  /* Brand colors */
+  --brand-color-primary:    #1a1a18;
+  --brand-color-secondary:  #f5f2ec;
+  --brand-color-accent:     #c9401a;
+  --brand-color-neutral:    #888884;
+  --brand-color-bg:         #f5f2ec;
+  --brand-color-surface:    #ffffff;
+  --brand-color-text:       #1a1a18;
+  --brand-color-text-muted: #888884;
+
+  /* Brand typography */
+  --brand-type-display: 'Editorial New', Georgia, serif;
+  --brand-type-body:    'GT America', Helvetica, sans-serif;
+  --brand-type-mono:    'JetBrains Mono', monospace;
+
+  /* Brand spacing (base rhythm — prototypes may extend) */
+  --brand-space-xs:   0.25rem;
+  --brand-space-sm:   0.5rem;
+  --brand-space-md:   1rem;
+  --brand-space-lg:   2rem;
+  --brand-space-xl:   4rem;
+  --brand-space-2xl:  8rem;
+
+  /* Brand shape */
+  --brand-radius-sm: 0;
+  --brand-radius-md: 2px;
+  --brand-radius-lg: 4px;
+}

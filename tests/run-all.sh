@@ -31,6 +31,11 @@ run_test "reference-validator: rejects adjectives" \
 run_test "reference-validator: accepts URLs and brands" \
   "bash '$TESTS_DIR/reference-validator.sh' 'https://stripe.com, Bauhaus, Bloomberg, 90s magazine'"
 
+run_test "template-rendering: no unsubstituted placeholders" \
+  "bash '$TESTS_DIR/template-rendering.sh' \
+     '$TESTS_DIR/fixtures/sample-brief.md' \
+     '$TESTS_DIR/tmp-output'"
+
 echo ""
 echo "=========================="
 echo "Results: $PASS passed, $FAIL failed"
