@@ -10,5 +10,6 @@ Thumbs.db
 
 # Test output
 tests/tmp-output/
+tests/tmp-verify/
 tests/fixtures/bad-prototype/_ai-tells.md
 tests/fixtures/good-prototype/_ai-tells.md
