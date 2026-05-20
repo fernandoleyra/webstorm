@@ -2,6 +2,9 @@
   "name": "webstorm",
   "version": "0.1.0",
   "description": "Scaffold a 3-prototype static website workspace with anti-AI-bias guardrails and parallel build agents.",
-  "author": "Leyra",
+  "author": {
+    "name": "Fernando Leyra",
+    "email": "fernando@family.agency"
+  },
   "homepage": "https://github.com/fernandoleyra/webstorm"
 }
