@@ -1,6 +1,6 @@
 ---
 name: webstorm
-description: Scaffold a 3-prototype static website workspace with brand ingestion, UX reference extraction, anti-AI-slop guardrails, and optional parallel build agents in isolated worktrees. Use when the user runs /webstorm or asks to scaffold a multi-prototype web design project.
+description: Use when running /webstorm or asked to scaffold a multi-prototype web design project. Handles brand ingestion, reference extraction, anti-AI-slop guardrails, and Google Stitch prompt generation per prototype.
 ---
 
 # Webstorm Skill
@@ -11,11 +11,9 @@ You are the webstorm skill. Follow this checklist exactly. Use TodoWrite to trac
 
 ## How to read arguments
 
-The user may have passed arguments via /webstorm:
-
 - `--brief`         → skip wizard; write pre-filled webstorm-brief.md, instruct user to edit it, wait for 'continue'
 - `--resume <path>` → load existing webstorm-brief.md at <path>, skip filled fields, continue from first empty one
-- `--rebuild style-N` → re-dispatch builder for one prototype only (skip questionnaire)
+- `--rebuild style-N` → re-generate Stitch prompt for one prototype only (skip questionnaire)
 - `--dry-run`       → run full wizard but print what would be written; do not create files
 - `--reconfigure`   → re-run Phase 0 (plugin settings) only
 - (no args)         → full wizard mode
@@ -28,24 +26,18 @@ Read `.claude/webstorm.local.md` if it exists. If it does not exist (first run),
 
 **Q0 — First-run settings (only if .claude/webstorm.local.md is missing):**
 
-Call AskUserQuestion with these three questions in one call:
+Call AskUserQuestion with these two questions in one call:
 
 1. header: "Base path" | question: "Where should /webstorm create new projects by default?" | options: ~/Developer/ | ~/Projects/ | ~/Sites/ | ~/Desktop/
 
 2. header: "Date prefix" | question: "Use YYMMDD date prefix in project folder names? (e.g. 260520_ClientSlug)" | options: Yes (recommended) | No
-
-3. header: "Dispatch mode" | question: "Default behavior after scaffolding?" | options: Scaffold only | Checkpoint dispatch (build + review) | Autonomous (build + auto-fix)
 
 After answers, write `.claude/webstorm.local.md`:
 
 ```
 ---
 base_path: <answer-to-Q0a>
-default_use_tailwind_cdn: true
 default_date_prefix: <true|false>
-default_dispatch_mode: <scaffold-only|checkpoint|autonomous>
-preferred_builder_model: sonnet
-sniff_test_strictness: high
 ---
 
 # Webstorm plugin settings
@@ -81,7 +73,7 @@ Call AskUserQuestion with 3 questions:
 3. header: "Voice / tone" | question: "Pick up to 3 words that describe the brand's voice and tone." | multiSelect: true | options: Authoritative | Warm | Playful | Technical | Editorial | Restrained | Confident | Cheeky
 
 **If user provided a URL (not 'none'):**
-- Use the firecrawl skill or Firecrawl MCP tools to scrape the URL.
+- Use Playwright (navigate + snapshot) or the Firecrawl skill to scrape the URL.
 - Extract ONLY: navigation structure (IA), content section ordering, interaction patterns, copy tone.
 - Do NOT extract: colors, typefaces, or visual design tokens.
 - Write findings to `brand/voice.md` under heading "IA observations from <url>".
@@ -147,8 +139,8 @@ Call AskUserQuestion with 3 questions (one per slot, free text):
 - question: "References for style-N (min 2: URLs, named brands, movements, eras). Vague adjectives rejected."
 - options: [provide 3-4 example valid refs as options e.g. "https://stripe.com, Bauhaus" | "Bloomberg, 90s magazine" | "Massimo Vignelli, De Stijl"]
 
-For each prototype's answer, validate with: `bash tests/reference-validator.sh "<refs>"`
-If validation fails (exit 1), show the rejection reasons and ask again. Repeat until all pass.
+Validate each answer: reject if it contains only vague adjectives from anti-ai-rules.md Measure 1.
+If validation fails, show rejection reasons and ask again. Repeat until all pass.
 
 **Q4d — Off-limits**
 
@@ -164,7 +156,7 @@ Write all Phase 4 answers to `webstorm-brief.md`.
 ## Eager reference fetch
 
 For each prototype's validated references:
-- For each URL: scrape with Firecrawl. Extract: IA, interactions, layout grammar, content rhythm.
+- For each URL: scrape with Playwright or Firecrawl. Extract: IA, interactions, layout grammar, content rhythm.
   Write to `references/style-N/<slug>.md` with sections:
   `## IA pattern`, `## Interaction moves`, `## Layout grammar`, `## Content rhythm`
   NO sections called `## Color` or `## Typography`.
@@ -174,15 +166,13 @@ For each prototype's validated references:
 
 ---
 
-## Phase 5 — Tech and dispatch
+## Phase 5 — Export format
 
-Call AskUserQuestion with 2 questions:
+Call AskUserQuestion with 1 question:
 
-1. header: "Tailwind CDN" | question: "Use Tailwind CSS via CDN? (no build step, just a script tag)" | options: Yes, all prototypes | No, vanilla CSS only | Per-prototype (choose at build time)
+1. header: "Stitch export" | question: "Which framework should the Google Stitch prompts target for export?" | options: HTML/CSS (no framework — recommended) | Tailwind CSS | Vue.js | Angular
 
-2. header: "Dispatch" | question: "After scaffolding, what should happen?" | options: Scaffold only — I'll build manually | Build now (checkpoint — review after first pass) | Build now (autonomous — auto-fix, no interruptions)
-
-Write answers to `webstorm-brief.md`.
+Write answer to `webstorm-brief.md`.
 
 ---
 
@@ -192,7 +182,7 @@ If `--dry-run`, print the full list of files that would be written and exit.
 
 Otherwise:
 
-1. Determine project path: `<base_path>/<YYMMDD_ClientSlug>/<project-slug>/`
+1. Determine project path: `<base_path>/<YYMMDD_ClientSlug>/`
    If the project folder was already created in Phase 2 (for asset drop), use that path.
    If the name collides with an existing folder, prompt for a new name — never overwrite.
 
@@ -204,30 +194,18 @@ Otherwise:
      references/style-1/
      references/style-2/
      references/style-3/
-     style-1/assets/
-     style-2/assets/
-     style-3/assets/
+     style-1/
+     style-2/
+     style-3/
    ```
 
-3. Render templates using `bash tests/template-rendering.sh webstorm-brief.md <project>/`
-   (This renders scaffold.md, workflow.md, CLAUDE.md, brand/tokens.css, .gitignore)
+3. Write `brand/voice.md` (from Phase 2 ingestion, URL scrape, or greenfield draft).
 
-4. Write `brand/voice.md` (from Phase 2 ingestion, URL scrape, or greenfield draft).
+4. Write `brand/tokens.css` (from Phase 2, or DRAFT if greenfield).
 
-5. For each prototype n in (1, 2, 3):
-   Read `skills/webstorm/templates/CLAUDE.prototype.md.tmpl`.
-   Substitute:
-   - {{n}} → the prototype number (1, 2, or 3)
-   - {{project_name}} → from brief
-   - {{commandment}} → Phase 4 Q4a answer for this prototype
-   - {{temperature}} → Phase 4 Q4b answer
-   - {{temperature_directive}} → the directive text from anti-ai-rules.md Measure 6 table matching the temperature
-   - {{references_list}} → Phase 4 Q4c answer (validated)
-   - {{off_limits}} → Phase 4 Q4d answer, or "None declared." if blank
-   Write rendered content to `style-N/CLAUDE.md`.
+5. Write `.gitignore` with `node_modules/` and `.DS_Store`.
 
 6. Pre-commit self-check:
-   - Every `style-N/CLAUDE.md` contains the prohibition list? → confirm
    - `brand/tokens.css` exists with no unfilled `{{` placeholders? → grep check
    - `references/style-N/` has at least one file per prototype? → confirm
    - `webstorm-brief.md` is complete (no empty required fields)? → confirm
@@ -240,74 +218,120 @@ Otherwise:
    git commit -m "scaffold from /webstorm — $(date +%Y-%m-%d)"
    ```
 
-8. Print:
-   ```
-   ✓ Project scaffolded: <project-path>
-
-   Preview each prototype:
-     cd <project>-style-1 && python3 -m http.server 8001
-     cd <project>-style-2 && python3 -m http.server 8002
-     cd <project>-style-3 && python3 -m http.server 8003
-
-   Or open directly:
-     open <project>/style-1/index.html
+8. Create 3 branches and 3 worktrees:
+   ```bash
+   git branch proto/style-1
+   git branch proto/style-2
+   git branch proto/style-3
+   git worktree add ../<project-slug>-style-1 proto/style-1
+   git worktree add ../<project-slug>-style-2 proto/style-2
+   git worktree add ../<project-slug>-style-3 proto/style-3
    ```
 
 ---
 
-## Dispatch branch
+## Google Stitch Prompt Generation
 
-### Scaffold only
-Exit after printing preview commands.
+For each prototype n in (1, 2, 3), synthesize one Google Stitch prompt and write it to `style-N/STITCH_PROMPT.md` in the worktree. Commit each file to its branch.
 
-### Checkpoint dispatch
+### Stitch prompt structure
 
-1. Invoke `superpowers:using-git-worktrees` to create 3 worktrees:
-   - `<project>-style-1/` on branch `proto/style-1`
-   - `<project>-style-2/` on branch `proto/style-2`
-   - `<project>-style-3/` on branch `proto/style-3`
+Each prompt must include all 8 blocks below. Pull values from `webstorm-brief.md`, `brand/tokens.css`, `brand/voice.md`, and the `references/style-N/` files.
 
-2. Read `skills/webstorm/dispatch/builder-prompt.md`.
+**Block 1 — Project context (2–3 sentences)**
+Who the client is, what the site is for, who the audience is, and the success metric. Use facts from Phase 1, not marketing language.
 
-3. Dispatch 3 Agent calls in ONE message (they run concurrently). For each n in (1, 2, 3):
-   - Interpolate the builder prompt: replace {{n}}, {{project_name}}, {{worktree_path}}
-   - Set model to sonnet if temperature < 80, opus if temperature ≥ 80
-   - Call Agent with description="Build style-N: <project_name>", subagent_type="general-purpose"
+**Block 2 — Vibe & references**
+List the validated references from Q4c, with 1-sentence description of what to borrow from each (IA pattern, layout grammar, rhythm — NOT color or typeface). State the compositional commandment verbatim.
 
-4. Await all three returns.
+**Block 3 — Color system**
+List every token from `brand/tokens.css` as `Token name: #HEXVAL — role`. If tokens are DRAFT, mark them as such and instruct Stitch to use them as a starting point, not a locked floor.
 
-5. For each prototype, dispatch a sniff-test agent:
-   Agent(prompt="Run `bash tests/sniff-test.sh style-N/` in <worktree-path>. Return the full contents of style-N/_ai-tells.md verbatim.")
-   Run all three in parallel.
+**Block 4 — Typography direction**
+Propose 2–3 font pairings to explore, chosen to complement the brand and commandment. Never propose Inter, system-ui, or -apple-system as the primary display face. Map each font to a role (display heading / body / UI label). Note: do not lock one pairing — Stitch should show the best one.
 
-6. Print summary per prototype: path, file count, sniff-test HIGH/MEDIUM severity.
-   Invite user to review and decide: accept / iterate / rebuild one.
+**Block 5 — Screen list**
+List up to 5 screens in order (from Phase 3 page selection). For each screen:
+- Screen name
+- Key sections / components it must contain
+- Any screen-specific layout instruction
 
-7. Exit.
+**Block 6 — Actual content**
+Provide real copy, real product names, real prices, real addresses — whatever was established during brand ingestion. Mark invented placeholder values clearly as `[PLACEHOLDER]`. This block prevents Lorem Ipsum and generic AI fill.
 
-### Autonomous dispatch
+**Block 7 — Explicitly forbidden**
+Copy the applicable prohibitions from anti-ai-rules.md Measures 1–4 and append the prototype's Q4d off-limits list. Phrase as direct negative instructions ("Do not use...", "Never use...").
+Always include these universal forbids:
+- Do not use Inter, system-ui, or -apple-system as the primary typeface
+- Do not use Tailwind default color scales (slate-*, zinc-*, gray-*, indigo-*) as brand colors
+- Do not use purple-to-blue, pink-to-orange, or teal-to-pink gradients
+- Do not use a centered hero with headline / subtitle / two CTAs as the default layout
+- Do not use rounded-2xl shadow-lg card pattern
+- Do not use Lucide, Heroicons, or Font Awesome icons by default
+- Do not write copy with "Transform your...", "Built for...", "The future of...", "Empower your..."
 
-1–4. Same as Checkpoint.
+**Block 8 — Export instruction**
+"Export as <framework from Phase 5>. Deliver a single self-contained file per screen."
 
-5. For each prototype with HIGH sniff-test findings:
-   Re-dispatch builder (same worktree, same branch) with original prompt + appended:
-   "Your previous pass had these HIGH AI-tell findings:\n<findings>\nFix them without breaking the compositional commandment. Do not introduce new forbidden patterns."
-   Run sniff test again.
-   Repeat up to 3 total iterations per prototype.
+### Temperature → tone instruction
 
-6. Auto-commit final state on each worktree branch.
+Append the matching directive from anti-ai-rules.md Measure 6 table at the end of Block 2:
 
-7. Print final summary and exit.
+| Temperature | Append to Block 2 |
+|-------------|-------------------|
+| 0–25  | "Stay close to safe corporate norms. No surprises." |
+| 26–45 | "Confident but restrained. Avoid clichés. Do not intentionally surprise." |
+| 46–65 | "Distinctive. Make at least 2 unconventional compositional choices." |
+| 66–85 | "Bold. Push type scale, layout asymmetry, and color aggressively. Justify each choice." |
+| 86–100 | "Experimental. Reject any default. If a section looks like 100 other websites, redo it." |
+
+---
+
+## Output to user
+
+After writing all 3 `STITCH_PROMPT.md` files and committing them, print:
+
+```
+✓ Scaffolded: <project-path>
+✓ 3 Google Stitch prompts generated — one per prototype
+
+──────────────────────────────────────────────────
+NEXT STEPS
+──────────────────────────────────────────────────
+1. Open https://stitch.withgoogle.com
+2. For each prototype, paste the prompt from:
+     style-1/STITCH_PROMPT.md  →  Prototype 1: <commandment-1>
+     style-2/STITCH_PROMPT.md  →  Prototype 2: <commandment-2>
+     style-3/STITCH_PROMPT.md  →  Prototype 3: <commandment-3>
+3. Use Stitch's 5-screen mode to generate all screens at once.
+4. Export as <export-format> and download.
+5. Drop exported files into the matching style-N/ worktree directory.
+6. Return here and run `/webstorm --rebuild style-N` for each prototype
+   to run the sniff test and commit the final build.
+──────────────────────────────────────────────────
+```
+
+Then print each prompt inline in a fenced markdown block so the user can read and copy directly without opening files.
+
+---
+
+## Post-Stitch handoff (`--rebuild style-N`)
+
+When user returns with Stitch exports and runs `/webstorm --rebuild style-N`:
+
+1. Scan `style-N/` for exported HTML/CSS/JS files.
+2. Run sniff test: check for Measure 2 violations (Inter, forbidden gradients, etc.) in the exported code.
+3. If HIGH violations found: print a targeted fix list and ask user whether to fix manually or re-prompt Stitch.
+4. If clean (or after fixes): `git add style-N/ && git commit -m "build: style-N Stitch export"` on that worktree's branch.
+5. Print: "style-N committed. Open: `open <worktree-path>/index.html`"
 
 ---
 
 ## Edge cases
 
 - Re-invoked inside existing webstorm project (webstorm-brief.md found in cwd or ancestor): offer resume / new project / abort.
-- All 3 builders flag same AI-tell: surface as a brand-level issue; offer to revise brand/tokens.css first.
-- One builder times out or errors: flag it, continue with the other two, print rebuild command: `/webstorm --rebuild style-N`.
+- All 3 Stitch prompts flag same AI-tell after export: surface as a brand-level issue; offer to revise brand/tokens.css and regenerate prompts.
 - Asset-drop 'continue' with empty assets/: warn ("no files detected; proceeding without local brand ingest") and continue.
 - Non-git cwd: create new git repo at project path; do not touch cwd.
 - Project folder name collision: prompt for new name; never overwrite.
-- frontend-design skill not installed: continue with prohibition list only; note in final summary.
-- Worktree creation blocked: surface the error from `superpowers:using-git-worktrees`; the scaffold is already committed and safe; print: "Worktree creation failed: <reason>. Your scaffold is intact at <project-path>. Retry dispatch with `/webstorm --rebuild style-N` once the issue is resolved."
+- Worktree creation blocked: surface the error; scaffold is intact; print: "Worktree creation failed: <reason>. Your scaffold is at <project-path>. Retry with `/webstorm --rebuild style-N` once resolved."

@@ -163,20 +163,13 @@ Input: free text per slot (optional — leave blank to skip)
 
 ---
 
-## Phase 5 — Tech and dispatch
+## Phase 5 — Export format
 
-**Q5a — Tailwind CDN**
-Question: "Use Tailwind CSS via CDN? (No build step — just a <script> tag)"
+**Q5a — Stitch export format**
+Question: "Which framework should the Google Stitch prompts target for export?"
 Options:
-- Yes, all prototypes use Tailwind CDN
-- No, vanilla CSS only across all prototypes
-- Per-prototype (I'll choose at build time)
-Default: Yes
-
-**Q5b — Dispatch mode**
-Question: "After scaffolding, what should happen?"
-Options:
-- Scaffold only — I'll build prototypes manually in separate sessions
-- Build now (checkpoint — review after first pass)
-- Build now (autonomous — auto-fix, no interruptions)
-Default: from plugin settings (default_dispatch_mode)
+- HTML/CSS (no framework — recommended)
+- Tailwind CSS
+- Vue.js
+- Angular
+Default: HTML/CSS
