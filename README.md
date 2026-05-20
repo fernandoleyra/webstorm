@@ -1,5 +1,7 @@
 # Webstorm
 
+![Webstorm banner](docs/banner.png)
+
 ![version](https://img.shields.io/badge/version-0.1.0-blue) ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
 Every AI-generated website looks the same. Inter, slate-900, rounded-2xl cards, a purple-to-blue gradient behind the hero, and copy that opens with "Transform your workflow."
