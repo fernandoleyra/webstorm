@@ -310,4 +310,4 @@ Exit after printing preview commands.
 - Non-git cwd: create new git repo at project path; do not touch cwd.
 - Project folder name collision: prompt for new name; never overwrite.
 - frontend-design skill not installed: continue with prohibition list only; note in final summary.
-- Worktree creation blocked: surface the error; scaffold is already committed and safe; user can retry dispatch later.
+- Worktree creation blocked: surface the error from `superpowers:using-git-worktrees`; the scaffold is already committed and safe; print: "Worktree creation failed: <reason>. Your scaffold is intact at <project-path>. Retry dispatch with `/webstorm --rebuild style-N` once the issue is resolved."
