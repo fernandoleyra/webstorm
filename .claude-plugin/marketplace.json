@@ -1,5 +1,10 @@
 {
   "name": "webstorm-marketplace",
+  "description": "WebStorm plugin marketplace by Fernando Leyra",
+  "owner": {
+    "name": "Fernando Leyra",
+    "email": "fernando@family.agency"
+  },
   "plugins": [
     {
       "source": "url",
