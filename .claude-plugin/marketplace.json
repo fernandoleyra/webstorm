@@ -10,8 +10,7 @@
       "name": "webstorm",
       "description": "Scaffold a 3-prototype static website workspace with anti-AI-bias guardrails and parallel build agents.",
       "version": "0.1.0",
-      "source": "url",
-      "url": "https://github.com/fernandoleyra/webstorm",
+      "source": "./",
       "author": {
         "name": "Fernando Leyra",
         "email": "fernando@family.agency"
