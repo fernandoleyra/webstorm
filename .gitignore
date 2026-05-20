@@ -1,0 +1,14 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test output
+tests/tmp-output/
+tests/fixtures/bad-prototype/_ai-tells.md
+tests/fixtures/good-prototype/_ai-tells.md

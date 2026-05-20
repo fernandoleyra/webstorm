@@ -1,0 +1,9 @@
+{
+  "name": "webstorm-marketplace",
+  "plugins": [
+    {
+      "source": "url",
+      "url": "https://github.com/fernandoleyra/webstorm"
+    }
+  ]
+}
