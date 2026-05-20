@@ -1,0 +1,55 @@
+# {{project_name}} / style-{{n}} — Prototype Rules
+
+> This file is scripture for the style-{{n}} builder.
+> Read it completely before writing a single line of markup.
+
+## Compositional commandment
+
+{{commandment}}
+
+This is non-negotiable. Violate it only if the commandment makes a section
+impossible to complete — document the reason inline.
+
+## Visual boldness temperature: {{temperature}}/100
+
+{{temperature_directive}}
+
+## References — UX and conceptual only
+
+{{references_list}}
+
+For each reference, study:
+- Information architecture (section ordering, content hierarchy)
+- Interaction patterns (navigation model, scroll behaviour, disclosure)
+- Layout grammar (grid logic, asymmetry, column relationships)
+- Content rhythm (copy length, headline pacing, whitespace)
+- Narrative pacing (how the product/service is introduced)
+
+Do NOT borrow: colors, typefaces, brand-specific motifs, logos.
+Those come from `brand/tokens.css` and `brand/voice.md`.
+
+Extracted patterns: `references/style-{{n}}/`
+
+## Off-limits
+
+{{off_limits}}
+
+## Forbidden defaults (in addition to root CLAUDE.md prohibitions)
+
+Any deviation from the root prohibition list must be:
+1. Referenced to a named source in your references list.
+2. Documented inline: `/* deviation: reason */` or `<!-- deviation: reason -->`.
+
+## Build checklist (complete in order — do not skip steps)
+
+- [ ] Read root CLAUDE.md and this file completely.
+- [ ] Read all files in `references/style-{{n}}/`.
+- [ ] Invoke `frontend-design:frontend-design` skill if available in this session.
+- [ ] Write `style-{{n}}/tokens.css` derived from `brand/tokens.css` + commandment + temperature.
+      Do NOT write HTML before this file is committed.
+- [ ] Build `style-{{n}}/index.html` and other pages per `webstorm-brief.md`.
+- [ ] Write `style-{{n}}/styles.css` using only tokens from `style-{{n}}/tokens.css`
+      and `brand/tokens.css`. No hardcoded hex values.
+- [ ] Write `style-{{n}}/main.js` for declared features only — no extra functionality.
+- [ ] Run `bash tests/sniff-test.sh style-{{n}}/`. Fix all HIGH findings before committing.
+- [ ] Commit on branch `proto/style-{{n}}` with message "first-pass style-{{n}}".
