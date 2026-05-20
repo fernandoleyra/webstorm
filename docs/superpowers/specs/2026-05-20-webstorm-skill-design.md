@@ -203,11 +203,12 @@ Three `Agent` calls in a **single message** → run truly concurrently. Each sub
 ```
 You are building style-N of <project>. Worktree: <path>.
 
-Read before writing anything:
-  scaffold.md, workflow.md, CLAUDE.md (root), style-N/CLAUDE.md (scripture),
-  brand/tokens.css, brand/voice.md, references/style-N/*.md
+Step 0 — read all of these before writing anything:
+         scaffold.md, workflow.md, CLAUDE.md (root),
+         style-N/CLAUDE.md (scripture), brand/tokens.css, brand/voice.md,
+         references/style-N/*.md
 
-Invoke skill (if available): frontend-design:frontend-design
+Step 0.5 — invoke skill (if available): frontend-design:frontend-design
 
 Step 1 — write style-N/tokens.css derived from brand/tokens.css + your
          compositional commandment + temperature. Do NOT write markup
